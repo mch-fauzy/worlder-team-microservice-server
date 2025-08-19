@@ -1,0 +1,133 @@
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: worlder-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - worlder-network
+    command: --default-authentication-plugin=mysql_native_password
+
+  # Redis for caching and rate limiting
+  redis:
+    image: redis:7-alpine
+    container_name: worlder-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - worlder-network
+
+  # Microservice B (Data Storage Service)
+  microservice-b:
+    build:
+      context: .
+      dockerfile: microservice-b/Dockerfile
+    container_name: worlder-storage-service
+    environment:
+      - PORT=${MICROSERVICE_B_PORT}
+      - GRPC_PORT=${GRPC_PORT}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=3306
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_URL=${REDIS_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - LOG_LEVEL=${LOG_LEVEL}
+    ports:
+      - "${MICROSERVICE_B_PORT}:${MICROSERVICE_B_PORT}"
+      - "${GRPC_PORT}:${GRPC_PORT}"
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - worlder-network
+    restart: unless-stopped
+
+  # Microservice A (Data Generator Service)
+  microservice-a:
+    build:
+      context: .
+      dockerfile: microservice-a/Dockerfile
+    environment:
+      - PORT=${MICROSERVICE_A_PORT}
+      - GRPC_SERVER_ADDRESS=${GRPC_SERVER_ADDRESS}
+      - SENSOR_TYPE=${SENSOR_TYPE}
+      - GENERATION_FREQUENCY=${GENERATION_FREQUENCY}
+      - LOG_LEVEL=${LOG_LEVEL}
+    ports:
+      - "${MICROSERVICE_A_PORT}:${MICROSERVICE_A_PORT}"
+    depends_on:
+      - microservice-b
+    networks:
+      - worlder-network
+    restart: unless-stopped
+
+  # Additional Generator Instances for different sensor types
+  microservice-a-humidity:
+    build:
+      context: .
+      dockerfile: microservice-a/Dockerfile
+    ports:
+      - "${MICROSERVICE_A_HUMIDITY_PORT}:${MICROSERVICE_A_PORT}"  # Expose humidity sensor API on port 8082
+    environment:
+      - PORT=${MICROSERVICE_A_PORT}
+      - GRPC_SERVER_ADDRESS=${GRPC_SERVER_ADDRESS}
+      - SENSOR_TYPE=humidity
+      - GENERATION_FREQUENCY=${GENERATION_FREQUENCY}
+      - LOG_LEVEL=${LOG_LEVEL}
+    depends_on:
+      - microservice-b
+    networks:
+      - worlder-network
+    restart: unless-stopped
+
+  microservice-a-pressure:
+    build:
+      context: .
+      dockerfile: microservice-a/Dockerfile
+    ports:
+      - "${MICROSERVICE_A_PRESSURE_PORT}:${MICROSERVICE_A_PORT}"  # Expose pressure sensor API on port 8083
+    environment:
+      - PORT=${MICROSERVICE_A_PORT}
+      - GRPC_SERVER_ADDRESS=${GRPC_SERVER_ADDRESS}
+      - SENSOR_TYPE=pressure
+      - GENERATION_FREQUENCY=${GENERATION_FREQUENCY}
+      - LOG_LEVEL=${LOG_LEVEL}
+    depends_on:
+      - microservice-b
+    networks:
+      - worlder-network
+    restart: unless-stopped
+
+  # Nginx Load Balancer
+  nginx:
+    image: nginx:alpine
+    container_name: worlder-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./infrastructures/nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - microservice-b
+    networks:
+      - worlder-network
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  worlder-network:
+    driver: bridge

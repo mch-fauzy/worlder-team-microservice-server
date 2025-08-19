@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package sensor;
+
+option go_package = "github.com/worlder-team/microservice-server/shared/proto/sensor";
+
+import "google/protobuf/timestamp.proto";
+
+// Sensor data message
+message SensorData {
+  double sensor_value = 1;
+  string sensor_type = 2;
+  string id1 = 3;
+  int32 id2 = 4;
+  google.protobuf.Timestamp timestamp = 5;
+}
+
+// Response for sensor data operations
+message SensorResponse {
+  bool success = 1;
+  string message = 2;
+  string error = 3;
+}
+
+// Batch sensor data for bulk operations
+message SensorDataBatch {
+  repeated SensorData data = 1;
+}
+
+// Service definition
+service SensorService {
+  // Send single sensor data
+  rpc SendSensorData(SensorData) returns (SensorResponse);
+  
+  // Send batch sensor data
+  rpc SendSensorDataBatch(SensorDataBatch) returns (SensorResponse);
+  
+  // Health check
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+// Health check messages
+message HealthCheckRequest {
+  string service = 1;
+}
+
+message HealthCheckResponse {
+  enum ServingStatus {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+  }
+  ServingStatus status = 1;
+}
