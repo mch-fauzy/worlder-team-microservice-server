@@ -3,8 +3,10 @@ definitions:
   dtos.LoginRequest:
     properties:
       email:
+        example: admin@example.com
         type: string
       password:
+        example: password
         type: string
     required:
     - email

@@ -332,10 +332,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "admin@example.com"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "password"
                 }
             }
         },
