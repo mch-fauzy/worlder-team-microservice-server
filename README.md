@@ -147,44 +147,6 @@ vim .env
 make quick-start
 ```
 
-4. **View available commands**:
-```bash
-make help
-```
-
-5. **Monitor logs**:
-```bash
-make logs
-```
-
-6. **Stop all services**:
-```bash
-make stop
-```
-
-### Manual Development Setup (Alternative)
-
-1. **Set up environment variables** (same as above):
-```bash
-cp .env.example .env
-# Edit .env with your configuration
-```
-
-2. **Generate protobuf files**:
-```bash
-make proto
-```
-
-3. **Build services**:
-```bash
-make build
-```
-
-4. **Start services individually**:
-```bash
-make run
-```
-
 ### After Starting Services
 
 Once services are running, you can access:
@@ -202,10 +164,12 @@ Once services are running, you can access:
 |---------|-------------|
 | `make help` | Show all available commands |
 | `make quick-start` | Start all services quickly |
-| `make build` | Build all microservices |
 | `make run` | Start all services with Docker Compose |
 | `make stop` | Stop all services |
 | `make restart` | Restart all services |
+| `make rebuild` | Rebuild and restart all services |
+| `make rebuild-generators` | Rebuild only microservice-a generators |
+| `make rebuild-storage` | Rebuild only microservice-b storage service |
 | `make logs` | View logs from all services |
 | `make clean` | Clean up containers and volumes |
 | `make proto` | Generate protobuf files |
@@ -223,16 +187,13 @@ cat .env
 docker-compose config
 
 # 3. Clean and restart services
-make stop
 make clean
 make quick-start
 ```
 
 **Need to rebuild after changes?**
 ```bash
-make stop
-docker-compose build --no-cache
-make run
+make rebuild
 ```
 
 **Database connection issues?**
@@ -241,7 +202,6 @@ make run
 make logs
 # Wait until you see "MySQL ready for connections"
 make restart
-```
 ```
 
 ## API Documentation
