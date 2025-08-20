@@ -52,11 +52,14 @@ func LoadConfig() *Config {
 			WriteTimeout: utils.ParseDurationOrZero(utils.GetEnvOrDefault("WRITE_TIMEOUT", "10s")),
 		},
 		GRPC: GRPCConfig{
-			ServerHost: utils.GetEnvOrDefault("GRPC_HOST", "microservice-a-generator"),
+			// GRPC_HOST points to microservice-b (storage service) where generators send data, check service name in docker-compose.yml
+			ServerHost: utils.GetEnvOrDefault("GRPC_HOST", "microservice-b"),
 			ServerPort: utils.GetEnvOrDefault("GRPC_PORT", "50051"),
 		},
 		Generator: GeneratorConfig{
-			Frequency: utils.GetEnvOrDefault("GENERATION_FREQUENCY", "300s"),
+			// SENSOR_TYPE is set by docker-compose.yml for each service instance (not in .env file)
+			SensorType: utils.GetEnvOrDefault("SENSOR_TYPE", "temperature"),
+			Frequency:  utils.GetEnvOrDefault("GENERATION_FREQUENCY", "300s"),
 		},
 		RateLimit: RateLimitConfig{
 			RequestsPerMinute: utils.ParseInt(utils.GetEnvOrDefault("RATE_LIMIT", "100")),
