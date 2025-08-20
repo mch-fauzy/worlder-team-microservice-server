@@ -281,7 +281,6 @@ func (h *SensorHandler) Update(c echo.Context) error {
 // @Success 200 {object} shared.APIResponse
 // @Security Bearer
 // @Router /sensors/{id} [delete]
-// @Router /sensors/{id} [delete]
 func (h *SensorHandler) Delete(c echo.Context) error {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
