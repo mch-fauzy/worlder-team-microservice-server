@@ -4,8 +4,8 @@ import "time"
 
 // LoginRequest represents login request
 type LoginRequest struct {
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required"`
+	Email    string `json:"email" validate:"required,email" example:"admin@example.com"`
+	Password string `json:"password" validate:"required" example:"password"`
 }
 
 // LoginResponse represents login response
