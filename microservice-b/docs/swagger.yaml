@@ -1,0 +1,240 @@
+basePath: /api/v1
+definitions:
+  dtos.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  handlers.UpdateRequest:
+    properties:
+      sensor_type:
+        type: string
+      sensor_value:
+        type: number
+      timestamp:
+        type: string
+    type: object
+  shared.APIResponse:
+    properties:
+      data: {}
+      error:
+        type: string
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Sensor data storage and management service
+  title: Microservice B API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with email and password, return JWT token
+      parameters:
+      - description: Login credentials (email and password)
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/shared.APIResponse'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/shared.APIResponse'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/shared.APIResponse'
+      summary: User login
+      tags:
+      - auth
+  /health:
+    get:
+      description: Health check endpoint
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/shared.APIResponse'
+      summary: Health check
+      tags:
+      - health
+  /sensors:
+    get:
+      consumes:
+      - application/json
+      description: List sensor data with pagination and filtering
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - description: Sensor type filter
+        in: query
+        name: sensor_type
+        type: string
+      - description: ID1 filter
+        in: query
+        name: id1
+        type: string
+      - description: ID2 filter
+        in: query
+        name: id2
+        type: integer
+      - description: From time filter (RFC3339)
+        in: query
+        name: from_time
+        type: string
+      - description: To time filter (RFC3339)
+        in: query
+        name: to_time
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/shared.APIResponse'
+      security:
+      - Bearer: []
+      summary: List sensor data
+      tags:
+      - sensors
+  /sensors/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Soft delete sensor data by ID
+      parameters:
+      - description: Sensor data ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/shared.APIResponse'
+      security:
+      - Bearer: []
+      summary: Delete sensor data by ID
+      tags:
+      - sensors
+    patch:
+      consumes:
+      - application/json
+      description: Partially update sensor data by ID (PATCH)
+      parameters:
+      - description: Sensor data ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update parameters (all fields optional)
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/shared.APIResponse'
+      security:
+      - Bearer: []
+      summary: Partially update sensor data
+      tags:
+      - sensors
+  /sensors/{id1}/{id2}:
+    get:
+      consumes:
+      - application/json
+      description: Get sensor data by ID1 and ID2 combination
+      parameters:
+      - description: ID1
+        in: path
+        name: id1
+        required: true
+        type: string
+      - description: ID2
+        in: path
+        name: id2
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/shared.APIResponse'
+      security:
+      - Bearer: []
+      summary: Get sensor data by ID combination
+      tags:
+      - sensors
+  /sensors/duration:
+    get:
+      consumes:
+      - application/json
+      description: Get sensor data within a time range
+      parameters:
+      - description: From time (RFC3339)
+        in: query
+        name: from
+        required: true
+        type: string
+      - description: To time (RFC3339)
+        in: query
+        name: to
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/shared.APIResponse'
+      security:
+      - Bearer: []
+      summary: Get sensor data by duration
+      tags:
+      - sensors
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
