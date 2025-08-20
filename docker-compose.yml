@@ -4,7 +4,7 @@ services:
     image: mysql:8.0
     container_name: worlder-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
@@ -41,7 +41,8 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
-      - REDIS_URL=${REDIS_URL}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
       - JWT_SECRET=${JWT_SECRET}
       - LOG_LEVEL=${LOG_LEVEL}
     ports:
@@ -54,56 +55,110 @@ services:
       - worlder-network
     restart: unless-stopped
 
-  # Microservice A (Data Generator Service)
-  microservice-a:
+  # Microservice A - Temperature Generator (Primary Data Generator Service)
+  microservice-a-generator-temperature:
     build:
       context: .
       dockerfile: microservice-a/Dockerfile
+    container_name: worlder-generator-temperature
     environment:
       - PORT=${MICROSERVICE_A_PORT}
-      - GRPC_SERVER_ADDRESS=${GRPC_SERVER_ADDRESS}
-      - SENSOR_TYPE=${SENSOR_TYPE}
+      - EXTERNAL_PORT=${MICROSERVICE_A_TEMPERATURE_PORT}
+      - GRPC_HOST=${GRPC_HOST}
+      - GRPC_PORT=${GRPC_PORT}
+      - SENSOR_TYPE=${SENSOR_TYPE_TEMPERATURE}
       - GENERATION_FREQUENCY=${GENERATION_FREQUENCY}
       - LOG_LEVEL=${LOG_LEVEL}
     ports:
-      - "${MICROSERVICE_A_PORT}:${MICROSERVICE_A_PORT}"
+      - "${MICROSERVICE_A_TEMPERATURE_PORT}:${MICROSERVICE_A_PORT}"
     depends_on:
       - microservice-b
     networks:
       - worlder-network
     restart: unless-stopped
 
-  # Additional Generator Instances for different sensor types
-  microservice-a-humidity:
+  # Microservice A - Humidity Generator (configurable sensor type)
+  microservice-a-generator-humidity:
     build:
       context: .
       dockerfile: microservice-a/Dockerfile
-    ports:
-      - "${MICROSERVICE_A_HUMIDITY_PORT}:${MICROSERVICE_A_PORT}"  # Expose humidity sensor API on port 8082
+    container_name: worlder-generator-humidity
     environment:
       - PORT=${MICROSERVICE_A_PORT}
-      - GRPC_SERVER_ADDRESS=${GRPC_SERVER_ADDRESS}
-      - SENSOR_TYPE=humidity
+      - EXTERNAL_PORT=${MICROSERVICE_A_HUMIDITY_PORT}
+      - GRPC_HOST=${GRPC_HOST}
+      - GRPC_PORT=${GRPC_PORT}
+      - SENSOR_TYPE=${SENSOR_TYPE_HUMIDITY}
       - GENERATION_FREQUENCY=${GENERATION_FREQUENCY}
       - LOG_LEVEL=${LOG_LEVEL}
+    ports:
+      - "${MICROSERVICE_A_HUMIDITY_PORT}:${MICROSERVICE_A_PORT}"
     depends_on:
       - microservice-b
     networks:
       - worlder-network
     restart: unless-stopped
 
-  microservice-a-pressure:
+  # Microservice A - Pressure Generator (configurable sensor type)
+  microservice-a-generator-pressure:
     build:
       context: .
       dockerfile: microservice-a/Dockerfile
-    ports:
-      - "${MICROSERVICE_A_PRESSURE_PORT}:${MICROSERVICE_A_PORT}"  # Expose pressure sensor API on port 8083
+    container_name: worlder-generator-pressure
     environment:
       - PORT=${MICROSERVICE_A_PORT}
-      - GRPC_SERVER_ADDRESS=${GRPC_SERVER_ADDRESS}
-      - SENSOR_TYPE=pressure
+      - EXTERNAL_PORT=${MICROSERVICE_A_PRESSURE_PORT}
+      - GRPC_HOST=${GRPC_HOST}
+      - GRPC_PORT=${GRPC_PORT}
+      - SENSOR_TYPE=${SENSOR_TYPE_PRESSURE}
       - GENERATION_FREQUENCY=${GENERATION_FREQUENCY}
       - LOG_LEVEL=${LOG_LEVEL}
+    ports:
+      - "${MICROSERVICE_A_PRESSURE_PORT}:${MICROSERVICE_A_PORT}"
+    depends_on:
+      - microservice-b
+    networks:
+      - worlder-network
+    restart: unless-stopped
+
+  # Microservice A - Light Generator (configurable sensor type)
+  microservice-a-generator-light:
+    build:
+      context: .
+      dockerfile: microservice-a/Dockerfile
+    container_name: worlder-generator-light
+    environment:
+      - PORT=${MICROSERVICE_A_PORT}
+      - EXTERNAL_PORT=${MICROSERVICE_A_LIGHT_PORT}
+      - GRPC_HOST=${GRPC_HOST}
+      - GRPC_PORT=${GRPC_PORT}
+      - SENSOR_TYPE=${SENSOR_TYPE_LIGHT}
+      - GENERATION_FREQUENCY=${GENERATION_FREQUENCY}
+      - LOG_LEVEL=${LOG_LEVEL}
+    ports:
+      - "${MICROSERVICE_A_LIGHT_PORT}:${MICROSERVICE_A_PORT}"
+    depends_on:
+      - microservice-b
+    networks:
+      - worlder-network
+    restart: unless-stopped
+
+  # Microservice A - Motion Generator (configurable sensor type)
+  microservice-a-generator-motion:
+    build:
+      context: .
+      dockerfile: microservice-a/Dockerfile
+    container_name: worlder-generator-motion
+    environment:
+      - PORT=${MICROSERVICE_A_PORT}
+      - EXTERNAL_PORT=${MICROSERVICE_A_MOTION_PORT}
+      - GRPC_HOST=${GRPC_HOST}
+      - GRPC_PORT=${GRPC_PORT}
+      - SENSOR_TYPE=${SENSOR_TYPE_MOTION}
+      - GENERATION_FREQUENCY=${GENERATION_FREQUENCY}
+      - LOG_LEVEL=${LOG_LEVEL}
+    ports:
+      - "${MICROSERVICE_A_MOTION_PORT}:${MICROSERVICE_A_PORT}"
     depends_on:
       - microservice-b
     networks:

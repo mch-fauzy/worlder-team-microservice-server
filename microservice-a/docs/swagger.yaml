@@ -1,0 +1,122 @@
+basePath: /api/v1
+definitions:
+  dtos.FrequencyRequest:
+    properties:
+      frequency:
+        type: string
+    required:
+    - frequency
+    type: object
+  shared.APIResponse:
+    properties:
+      data: {}
+      error:
+        type: string
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Sensor data generation service
+  title: Microservice A API
+  version: "1.0"
+paths:
+  /frequency:
+    get:
+      consumes:
+      - application/json
+      description: Get the current generation frequency
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/shared.APIResponse'
+      summary: Get current frequency
+      tags:
+      - generator
+    post:
+      consumes:
+      - application/json
+      description: Set the frequency of sensor data generation
+      parameters:
+      - description: Frequency parameters
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.FrequencyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/shared.APIResponse'
+      summary: Set generation frequency
+      tags:
+      - generator
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Check if the service is healthy
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/shared.APIResponse'
+      summary: Health check
+      tags:
+      - health
+  /start:
+    post:
+      consumes:
+      - application/json
+      description: Start generating sensor data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/shared.APIResponse'
+      summary: Start data generation
+      tags:
+      - generator
+  /status:
+    get:
+      consumes:
+      - application/json
+      description: Get current generator status and configuration
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/shared.APIResponse'
+      summary: Get generation status
+      tags:
+      - generator
+  /stop:
+    post:
+      consumes:
+      - application/json
+      description: Stop generating sensor data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/shared.APIResponse'
+      summary: Stop data generation
+      tags:
+      - generator
+swagger: "2.0"

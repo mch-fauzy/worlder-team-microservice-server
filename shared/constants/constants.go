@@ -1,11 +1,8 @@
 package constants
 
 const (
-	// API Version
-	APIVersion = "v1"
-
 	// Default pagination
-	DefaultPageSize = 20
+	DefaultPageSize = 10
 	MaxPageSize     = 100
 
 	// Sensor types
