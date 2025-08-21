@@ -158,8 +158,7 @@ graph TB
 - **Scalability**: Horizontal scaling through multiple generator instances
 - **Communication**: gRPC for inter-service communication, REST for client APIs
 - **Data Flow**: Unidirectional data flow from generators to storage
-- **Authentication**: JWT-based authentication with role-based access control
-- **Monitoring**: Health checks and comprehensive logging
+- **Authentication**: JWT-based authentication
 
 ### Data Flow
 
@@ -217,7 +216,6 @@ worlder-team-microservice-server/
 │   │   ├── config.go         # Config struct and loading
 │   │   └── logger.go         # Logger configuration
 │   ├── shared/               # Local shared types (APIResponse)
-│   ├── migrations/            # Database schema migrations
 │   ├── docs/                 # Auto-generated Swagger docs
 │   └── Dockerfile            # Container build configuration
 ├── shared/                      # Shared components across services
@@ -237,33 +235,50 @@ worlder-team-microservice-server/
 └── README.md                 # This file
 ```
 
-## Features
+## Database Schema (ERD)
 
-### Microservice A Features
-- **Data Generation**: Continuous sensor data generation with timestamps
-- **Configurable Frequency**: REST API to control data generation frequency
-- **Multiple Sensor Types**: Support for different sensor types per instance
-- **gRPC Communication**: Efficient data transmission to Microservice B
-- **Health Monitoring**: Health check endpoints
+The system uses MySQL database with the following entity relationships:
 
-### Microservice B Features
-- **Data Storage**: Persistent storage in MySQL with optimized queries
-- **REST API Endpoints**:
-  - Retrieve by ID combination
-  - Retrieve by duration/time range
-  - Retrieve by IDs + timestamps
-  - Delete sensor values with filters
-  - Edit/Update sensor values with filters
-  - Pagination support
-- **Authentication & Authorization**: JWT-based auth with role-based access
-- **Data Validation**: Comprehensive input validation
-- **Rate Limiting**: API rate limiting to prevent abuse
-- **Monitoring**: Metrics and health checks
+![Database ERD](docs/erd/erd.png)
+
+### Database Tables
+
+**users table** - Authentication and user management
+- `id` (Primary Key, Auto Increment)
+- `username` (Unique, VARCHAR(100))
+- `email` (Unique, VARCHAR(100))
+- `password` (Hashed, VARCHAR(255))
+- `role` (VARCHAR(50), Default: 'user')
+- `created_at`, `updated_at`, `deleted_at` (Timestamps)
+
+**sensor_data table** - All sensor readings storage
+- `id` (Primary Key, Auto Increment)
+- `sensor_value` (DECIMAL(10,4)) - Sensor reading value
+- `sensor_type` (VARCHAR(50)) - temperature, humidity, pressure, light, motion
+- `id1` (VARCHAR(50)) - Generator instance identifier
+- `id2` (INTEGER) - Secondary identifier
+- `timestamp` (TIMESTAMP) - When the data was generated
+- `created_at`, `updated_at`, `deleted_at` (Timestamps)
+
+### Database Design Notes
+
+- **users**: Manages authentication and authorization with role-based access
+- **sensor_data**: Stores all sensor readings from multiple microservice-a instances
+- **Soft Deletes**: Both tables support soft deletion using `deleted_at` timestamp
+- **Indexing**: Optimized for common query patterns (sensor type, time range, ID combinations)
+- **Scalability**: Schema designed to handle high-volume sensor data ingestion
+
+### Sensor Types Supported
+- `temperature` - Temperature readings in Celsius
+- `humidity` - Humidity percentage (0-100%)
+- `pressure` - Atmospheric pressure readings
+- `light` - Light intensity measurements
+- `motion` - Motion detection events
 
 ## Quick Start
 
 ### Prerequisites
-- Go 1.21+
+- Go 1.23+
 - Docker & Docker Compose
 - MySQL 8.0+
 
@@ -297,11 +312,12 @@ make quick-start
 
 Once services are running, you can access:
 
-- **Swagger API Documentation**: http://localhost:8081/swagger/index.html
-- **Temperature Sensor Service**: http://localhost:8080
+- **Storage Service (Microservice B)**: http://localhost:8080
+- **Temperature Sensor Service**: http://localhost:8081
 - **Humidity Sensor Service**: http://localhost:8082  
 - **Pressure Sensor Service**: http://localhost:8083
-- **Storage Service (Microservice B)**: http://localhost:8081
+- **Light Sensor Service**: http://localhost:8084
+- **Motion Sensor Service**: http://localhost:8085
 - **Load Balancer**: http://localhost:80
 
 ### Available Makefile Commands
@@ -354,16 +370,26 @@ make restart
 
 ### Microservice A Endpoints
 - `GET /health` - Health check
+- `GET /status` - Get generator status
 - `POST /frequency` - Set data generation frequency
 - `GET /frequency` - Get current frequency
-- `GET /status` - Get service status
+- `POST /start` - Start data generation
+- `POST /stop` - Stop data generation
 
 ### Microservice B Endpoints
 - `POST /auth/login` - Authentication
-- `GET /sensors` - List sensor data (with pagination)
+- `GET /sensors` - List sensor data (with pagination and filtering)
+- `GET /sensors/{id}` - Get sensor data by ID
 - `GET /sensors/{id1}/{id2}` - Get by ID combination
 - `GET /sensors/duration` - Get by time range
-- `PUT /sensors/{id}` - Update sensor data
-- `DELETE /sensors` - Delete with filters
+- `PATCH /sensors/{id}` - Update sensor data (partial update)
+- `DELETE /sensors/{id}` - Delete sensor data by ID
 
-Full API documentation is available at `/swagger` when running the services.
+Full API documentation is available at `/swagger/index.html` when running the services.
+
+### Postman Collection
+
+A comprehensive Postman collection is available for testing all API endpoints:
+
+📁 **[Download Postman Collection](docs/api/worlder-team-microservice-server.postman_collection.json)**
+
