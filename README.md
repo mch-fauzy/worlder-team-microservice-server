@@ -4,12 +4,7 @@ A comprehensive microservice backend system built with Go, Echo, MySQL, GORM, an
 
 ## Architecture Overview
 
-This system consists of    ├── configs/               # Configuration management
-   │   ├── config.go         # Config struct and loading
-   │   └── logger.go         # Logger configuration
-   ├── shared/               # Local shared types (APIResponse)
-   ├── migrations/            # Database schema migrations
-   └── Dockerfile            # Container build configurationn microservices:
+This system consists of two main microservices:
 
 ### Microservice A (Data Generator Service)
 - Generates sensor data streams with configurable frequency
