@@ -260,21 +260,6 @@ The system uses MySQL database with the following entity relationships:
 - `timestamp` (TIMESTAMP) - When the data was generated
 - `created_at`, `updated_at`, `deleted_at` (Timestamps)
 
-### Database Design Notes
-
-- **users**: Manages authentication and authorization with role-based access
-- **sensor_data**: Stores all sensor readings from multiple microservice-a instances
-- **Soft Deletes**: Both tables support soft deletion using `deleted_at` timestamp
-- **Indexing**: Optimized for common query patterns (sensor type, time range, ID combinations)
-- **Scalability**: Schema designed to handle high-volume sensor data ingestion
-
-### Sensor Types Supported
-- `temperature` - Temperature readings in Celsius
-- `humidity` - Humidity percentage (0-100%)
-- `pressure` - Atmospheric pressure readings
-- `light` - Light intensity measurements
-- `motion` - Motion detection events
-
 ## Quick Start
 
 ### Prerequisites
