@@ -4,7 +4,12 @@ A comprehensive microservice backend system built with Go, Echo, MySQL, GORM, an
 
 ## Architecture Overview
 
-This system consists of two main microservices:
+This system consists of    ├── configs/               # Configuration management
+   │   ├── config.go         # Config struct and loading
+   │   └── logger.go         # Logger configuration
+   ├── shared/               # Local shared types (APIResponse)
+   ├── migrations/            # Database schema migrations
+   └── Dockerfile            # Container build configurationn microservices:
 
 ### Microservice A (Data Generator Service)
 - Generates sensor data streams with configurable frequency
@@ -25,48 +30,78 @@ This system consists of two main microservices:
 ```mermaid
 graph TB
     %% External clients
-    Client[🌐 HTTP Clients<br/>Postman/Browser/API]
+    Client["`🌐 **HTTP Clients**
+    Postman/Browser/API`"]
     
     %% Load balancer
-    LB[🔄 Nginx Load Balancer<br/>Port: 80]
+    LB["`🔄 **Nginx Load Balancer**
+    Port: 80`"]
     
     %% Microservice A instances
-    subgraph "Microservice A (Data Generators)"
-        A1[🌡️ Temperature Generator<br/>Port: 8080<br/>REST API + gRPC Client]
-        A2[💧 Humidity Generator<br/>Port: 8082<br/>REST API + gRPC Client]  
-        A3[📊 Pressure Generator<br/>Port: 8083<br/>REST API + gRPC Client]
-        A4[💡 Light Generator<br/>Port: 8084<br/>REST API + gRPC Client]
-        A5[🚶 Motion Generator<br/>Port: 8085<br/>REST API + gRPC Client]
+    subgraph GenA [" "]
+        direction TB
+        A1["`🌡️ **Temperature**
+        Port: 8081
+        REST + gRPC`"]
+        A2["`💧 **Humidity**
+        Port: 8082
+        REST + gRPC`"]  
+        A3["`📊 **Pressure**
+        Port: 8083
+        REST + gRPC`"]
+        A4["`💡 **Light**
+        Port: 8084
+        REST + gRPC`"]
+        A5["`🚶 **Motion**
+        Port: 8085
+        REST + gRPC`"]
     end
     
     %% Microservice B
-    subgraph "Microservice B (Storage Service)"
-        B[🗄️ Storage Service<br/>Port: 8081<br/>REST API + gRPC Server]
+    subgraph StorageB [" "]
+        direction TB
+        B["`🗄️ **Storage Service**
+        Port: 8080
+        REST API + gRPC Server`"]
         
-        subgraph "Clean Architecture Layers"
-            BH[📝 Handlers Layer<br/>HTTP/gRPC Controllers]
-            BS[⚙️ Services Layer<br/>Business Logic]
-            BR[📦 Repository Layer<br/>Data Access]
+        subgraph Layers [" "]
+            direction LR
+            BH["`📝 **Handlers**
+            Controllers`"]
+            BS["`⚙️ **Services**
+            Business Logic`"]
+            BR["`📦 **Repository**
+            Data Access`"]
         end
         
-        subgraph "Modules"
-            AUTH[🔐 Auth Module<br/>JWT Authentication]
-            SENSOR[📊 Sensor Data Module<br/>CRUD Operations]
-            HEALTH[❤️ Health Module<br/>Status Monitoring]
+        subgraph Modules [" "]
+            direction LR
+            AUTH["`🔐 **Auth**
+            JWT`"]
+            SENSOR["`📊 **Sensor Data**
+            CRUD Ops`"]
+            HEALTH["`❤️ **Health**
+            Monitoring`"]
         end
     end
     
     %% Database
-    DB[(🗃️ MySQL Database<br/>Port: 3306<br/>GORM ORM)]
+    DB["`🗃️ **MySQL Database**
+    Port: 3306
+    GORM ORM`"]
     
-    %% Redis (optional caching)
-    REDIS[(🔴 Redis Cache<br/>Port: 6379<br/>Session Storage)]
+    %% Redis
+    REDIS["`🔴 **Redis Cache**
+    Port: 6379
+    Sessions`"]
     
-    %% External monitoring
-    SWAGGER[📚 Swagger UI<br/>API Documentation<br/>localhost:8081/swagger]
+    %% Documentation
+    SWAGGER["`📚 **Swagger UI**
+    API Documentation
+    :8080/swagger`"]
     
-    %% Connections
-    Client -.-> LB
+    %% Connections - HTTP REST
+    Client --> LB
     LB --> B
     Client --> A1
     Client --> A2  
@@ -74,19 +109,25 @@ graph TB
     Client --> A4
     Client --> A5
     
-    %% gRPC connections from generators to storage
-    A1 -.->|gRPC<br/>SendSensorData| B
-    A2 -.->|gRPC<br/>SendSensorData| B
-    A3 -.->|gRPC<br/>SendSensorData| B
-    A4 -.->|gRPC<br/>SendSensorData| B
-    A5 -.->|gRPC<br/>SendSensorData| B
+    %% gRPC connections
+    A1 -.->|"`**gRPC**
+    SendSensorData`"| B
+    A2 -.->|"`**gRPC**
+    SendSensorData`"| B
+    A3 -.->|"`**gRPC**
+    SendSensorData`"| B
+    A4 -.->|"`**gRPC**
+    SendSensorData`"| B
+    A5 -.->|"`**gRPC**
+    SendSensorData`"| B
     
-    %% Internal architecture
+    %% Internal flow
     B --> BH
     BH --> BS
     BS --> BR
     BR --> DB
     
+    %% Module connections
     B --> AUTH
     B --> SENSOR
     B --> HEALTH
@@ -99,18 +140,20 @@ graph TB
     %% Documentation
     B -.-> SWAGGER
     
-    %% Styling
-    classDef microserviceA fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    classDef microserviceB fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    classDef database fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
-    classDef client fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef infrastructure fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    %% Light mode styling
+    classDef generators fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
+    classDef storage fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
+    classDef database fill:#e8f5e8,stroke:#388e3c,stroke-width:2px,color:#000
+    classDef client fill:#fff8e1,stroke:#f57c00,stroke-width:2px,color:#000
+    classDef infrastructure fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#000
+    classDef groupBox fill:#f5f5f5,stroke:#616161,stroke-width:1px,color:#000
     
-    class A1,A2,A3,A4,A5 microserviceA
-    class B,BH,BS,BR,AUTH,SENSOR,HEALTH microserviceB
+    class A1,A2,A3,A4,A5 generators
+    class B,BH,BS,BR,AUTH,SENSOR,HEALTH storage
     class DB,REDIS database
     class Client,SWAGGER client
     class LB infrastructure
+    class GenA,StorageB,Layers,Modules groupBox
 ```
 
 ### Architecture Principles
@@ -136,11 +179,11 @@ graph TB
 
 ```
 worlder-team-microservice-server/
-├── microservice-a/              # Data Generator Service ✅ MIGRATED
+├── microservice-a/              # Data Generator Service
 │   ├── cmd/
 │   │   └── server/
 │   │       └── main.go         # Application entry point
-│   ├── modules/               # Feature-based organization (MIGRATED!)
+│   ├── modules/               # Feature-based organization
 │   │   ├── generator/         # Data generation & sensor management
 │   │   │   ├── entities/      # SensorData & GeneratorStatus entities
 │   │   │   ├── handlers/      # Generator HTTP handlers
@@ -154,11 +197,11 @@ worlder-team-microservice-server/
 │   │   └── config.go         # Config struct and loading
 │   ├── shared/               # Local shared types (APIResponse)
 │   └── Dockerfile            # Container build configuration
-├── microservice-b/              # Data Storage Service ✅ MIGRATED
+├── microservice-b/              # Data Storage Service
 │   ├── cmd/
 │   │   └── server/
 │   │       └── main.go         # Application entry point
-│   ├── modules/               # Feature-based organization (MIGRATED!)
+│   ├── modules/               # Feature-based organization
 │   │   ├── auth/              # Authentication & user management
 │   │   │   ├── entities/      # User entity with GORM tags
 │   │   │   ├── handlers/      # Auth HTTP handlers (login, etc.)
@@ -192,10 +235,6 @@ worlder-team-microservice-server/
 ├── infrastructures/            # Infrastructure configurations
 │   └── nginx/                # Load balancer configuration
 │       └── nginx.conf        # Nginx proxy settings
-├── docs/                       # Project documentation
-│   ├── architecture/          # Architecture diagrams
-│   ├── api/                   # API documentation & Postman collections
-│   └── erd/                   # Database entity relationship diagrams
 ├── .env                       # Environment variables (copy from .env.example)
 ├── .env.example              # Environment variables template
 ├── docker-compose.yml        # Multi-service orchestration
