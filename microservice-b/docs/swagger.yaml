@@ -114,6 +114,14 @@ paths:
         in: query
         name: to_time
         type: string
+      - description: Sort field
+        in: query
+        name: sort
+        type: string
+      - description: Sort order (asc, desc)
+        in: query
+        name: order
+        type: string
       produces:
       - application/json
       responses:
@@ -147,6 +155,36 @@ paths:
       security:
       - Bearer: []
       summary: Delete sensor data by ID
+      tags:
+      - sensors
+    get:
+      consumes:
+      - application/json
+      description: Get single sensor data by ID
+      parameters:
+      - description: Sensor data ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/shared.APIResponse'
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/shared.APIResponse'
+        "404":
+          description: Sensor data not found
+          schema:
+            $ref: '#/definitions/shared.APIResponse'
+      security:
+      - Bearer: []
+      summary: Get sensor data by ID
       tags:
       - sensors
     patch:
@@ -213,12 +251,12 @@ paths:
       parameters:
       - description: From time (RFC3339)
         in: query
-        name: from
+        name: from_time
         required: true
         type: string
       - description: To time (RFC3339)
         in: query
-        name: to
+        name: to_time
         required: true
         type: string
       produces:

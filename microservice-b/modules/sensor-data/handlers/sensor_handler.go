@@ -37,6 +37,8 @@ func NewSensorHandler(sensorService interfaces.SensorServiceInterface) *SensorHa
 // @Param id2 query int false "ID2 filter"
 // @Param from_time query string false "From time filter (RFC3339)"
 // @Param to_time query string false "To time filter (RFC3339)"
+// @Param sort query string false "Sort field"
+// @Param order query string false "Sort order (asc, desc)"
 // @Success 200 {object} shared.APIResponse
 // @Security Bearer
 // @Router /sensors [get]
@@ -146,20 +148,20 @@ func (h *SensorHandler) GetByIDCombination(c echo.Context) error {
 // @Tags sensors
 // @Accept json
 // @Produce json
-// @Param from query string true "From time (RFC3339)"
-// @Param to query string true "To time (RFC3339)"
+// @Param from_time query string true "From time (RFC3339)"
+// @Param to_time query string true "To time (RFC3339)"
 // @Success 200 {object} shared.APIResponse
 // @Security Bearer
 // @Router /sensors/duration [get]
 func (h *SensorHandler) GetByDuration(c echo.Context) error {
-	fromStr := c.QueryParam("from")
-	toStr := c.QueryParam("to")
+	fromStr := c.QueryParam("from_time")
+	toStr := c.QueryParam("to_time")
 
 	if fromStr == "" || toStr == "" {
 		return c.JSON(http.StatusBadRequest, shared.APIResponse{
 			Status:  constants.StatusError,
 			Message: constants.ErrInvalidRequest,
-			Error:   "Both 'from' and 'to' parameters are required",
+			Error:   "Both 'from_time' and 'to_time' parameters are required",
 		})
 	}
 
@@ -186,6 +188,45 @@ func (h *SensorHandler) GetByDuration(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, shared.APIResponse{
 			Status:  constants.StatusError,
 			Message: constants.ErrInternalServer,
+			Error:   err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, shared.APIResponse{
+		Status:  constants.StatusSuccess,
+		Message: "Sensor data retrieved successfully",
+		Data:    data,
+	})
+}
+
+// GetByID godoc
+// @Summary Get sensor data by ID
+// @Description Get single sensor data by ID
+// @Tags sensors
+// @Accept json
+// @Produce json
+// @Param id path int true "Sensor data ID"
+// @Success 200 {object} shared.APIResponse
+// @Failure 400 {object} shared.APIResponse "Invalid ID"
+// @Failure 404 {object} shared.APIResponse "Sensor data not found"
+// @Security Bearer
+// @Router /sensors/{id} [get]
+func (h *SensorHandler) GetByID(c echo.Context) error {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, shared.APIResponse{
+			Status:  constants.StatusError,
+			Message: constants.ErrInvalidRequest,
+			Error:   "Invalid ID format",
+		})
+	}
+
+	data, err := h.sensorService.GetSensorData(c.Request().Context(), uint(id))
+	if err != nil {
+		return c.JSON(http.StatusNotFound, shared.APIResponse{
+			Status:  constants.StatusError,
+			Message: "Sensor data not found",
 			Error:   err.Error(),
 		})
 	}

@@ -141,6 +141,18 @@ const docTemplate = `{
                         "description": "To time filter (RFC3339)",
                         "name": "to_time",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort field",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort order (asc, desc)",
+                        "name": "order",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -175,14 +187,14 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "From time (RFC3339)",
-                        "name": "from",
+                        "name": "from_time",
                         "in": "query",
                         "required": true
                     },
                     {
                         "type": "string",
                         "description": "To time (RFC3339)",
-                        "name": "to",
+                        "name": "to_time",
                         "in": "query",
                         "required": true
                     }
@@ -242,6 +254,53 @@ const docTemplate = `{
             }
         },
         "/sensors/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get single sensor data by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sensors"
+                ],
+                "summary": "Get sensor data by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Sensor data ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/shared.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/shared.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Sensor data not found",
+                        "schema": {
+                            "$ref": "#/definitions/shared.APIResponse"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {

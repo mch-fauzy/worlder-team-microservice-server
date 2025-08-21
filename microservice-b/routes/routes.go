@@ -89,8 +89,9 @@ func (r *Router) setupSensorRoutes(api *echo.Group) {
 	sensors.Use(sharedMiddleware.JWTAuth(r.config.JWT.Secret))
 
 	sensors.GET("", r.sensorHandler.List)
-	sensors.GET("/:id1/:id2", r.sensorHandler.GetByIDCombination)
 	sensors.GET("/duration", r.sensorHandler.GetByDuration)
+	sensors.GET("/:id", r.sensorHandler.GetByID)
+	sensors.GET("/:id1/:id2", r.sensorHandler.GetByIDCombination)
 	sensors.PATCH("/:id", r.sensorHandler.Update)
 	sensors.DELETE("/:id", r.sensorHandler.Delete)
 }
