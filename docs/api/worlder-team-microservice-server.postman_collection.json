@@ -1,0 +1,1015 @@
+{
+	"info": {
+		"_postman_id": "8bf57408-866d-44ca-8a92-ed4362289f54",
+		"name": "worlder-team-microservice-server",
+		"description": "Comprehensive API collection for all Worlder microservices including Storage Service (microservice-b) and all Generator Services (microservice-a instances)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28805337"
+	},
+	"item": [
+		{
+			"name": "Microservice B - Storage Service",
+			"item": [
+				{
+					"name": "Authentication",
+					"item": [
+						{
+							"name": "Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"if (pm.response.code === 200) {",
+											"    const response = pm.response.json();",
+											"    if (response.data && response.data.token) {",
+											"        pm.collectionVariables.set('jwt_token', response.data.token);",
+											"        console.log('JWT token saved to collection variable');",
+											"    }",
+											"}"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"password\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url_storage}}/api/v1/auth/login",
+									"host": [
+										"{{base_url_storage}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"login"
+									]
+								},
+								"description": "Authenticate user and receive JWT token"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Sensor Data Management",
+					"item": [
+						{
+							"name": "List All Sensors",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_storage}}/api/v1/sensors?page=1&page_size=10",
+									"host": [
+										"{{base_url_storage}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"sensors"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1",
+											"description": "Page number for pagination"
+										},
+										{
+											"key": "page_size",
+											"value": "10",
+											"description": "Number of items per page"
+										},
+										{
+											"key": "sensor_type",
+											"value": "temperature",
+											"description": "Filter by sensor type (temperature, humidity, pressure, light, motion)",
+											"disabled": true
+										},
+										{
+											"key": "id1",
+											"value": "3B733887",
+											"description": "Filter by first ID",
+											"disabled": true
+										},
+										{
+											"key": "id2",
+											"value": "1011",
+											"description": "Filter by second ID",
+											"disabled": true
+										},
+										{
+											"key": "from_time",
+											"value": "2025-08-20T00:00:00Z",
+											"description": "Filter from this time (RFC3339 format)",
+											"disabled": true
+										},
+										{
+											"key": "to_time",
+											"value": "2025-08-21T23:59:59Z",
+											"description": "Filter to this time (RFC3339 format)",
+											"disabled": true
+										},
+										{
+											"key": "sort",
+											"value": "id",
+											"description": "Sort field",
+											"disabled": true
+										},
+										{
+											"key": "order",
+											"value": "asc",
+											"description": "Sort order (asc, desc)",
+											"disabled": true
+										}
+									]
+								},
+								"description": "List sensor data with optional filtering, sorting, and pagination"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Sensors by ID Combination",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_storage}}/api/v1/sensors/SENSOR_001/1",
+									"host": [
+										"{{base_url_storage}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"sensors",
+										"SENSOR_001",
+										"1"
+									]
+								},
+								"description": "Get sensor data by ID1 and ID2 combination"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Sensors by Duration",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_storage}}/api/v1/sensors/duration?from_time=2025-08-20T00:00:00Z&to_time=2025-08-21T23:59:59Z",
+									"host": [
+										"{{base_url_storage}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"sensors",
+										"duration"
+									],
+									"query": [
+										{
+											"key": "from_time",
+											"value": "2025-08-20T00:00:00Z"
+										},
+										{
+											"key": "to_time",
+											"value": "2025-08-21T23:59:59Z"
+										}
+									]
+								},
+								"description": "Get sensor data within a time range"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Sensor by ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_storage}}/api/v1/sensors/194",
+									"host": [
+										"{{base_url_storage}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"sensors",
+										"194"
+									]
+								},
+								"description": "Get single sensor data by ID"
+							},
+							"response": []
+						},
+						{
+							"name": "Update Sensor Data",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"sensor_value\": 10\n//   \"sensor_type\": \"temperature\"\n//   \"timestamp\": \"2025-08-21T10:30:00Z\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url_storage}}/api/v1/sensors/194",
+									"host": [
+										"{{base_url_storage}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"sensors",
+										"194"
+									]
+								},
+								"description": "Partially update sensor data. All fields are optional. Supports zero values for sensor_value."
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Sensor Data",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url_storage}}/api/v1/sensors/1",
+									"host": [
+										"{{base_url_storage}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"sensors",
+										"1"
+									]
+								},
+								"description": "Soft delete sensor data by ID"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_storage}}/api/v1/health",
+							"host": [
+								"{{base_url_storage}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"health"
+							]
+						},
+						"description": "Check service health status"
+					},
+					"response": []
+				}
+			],
+			"description": "Sensor data storage and management service",
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{jwt_token}}",
+						"type": "string"
+					}
+				]
+			}
+		},
+		{
+			"name": "Microservice A - Temperature Generator Service",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_temperature}}/api/v1/health",
+							"host": [
+								"{{base_url_generator_temperature}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_temperature}}/api/v1/status",
+							"host": [
+								"{{base_url_generator_temperature}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Frequency",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_temperature}}/api/v1/frequency",
+							"host": [
+								"{{base_url_generator_temperature}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"frequency"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Set Frequency",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"frequency\": \"30s\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url_generator_temperature}}/api/v1/frequency",
+							"host": [
+								"{{base_url_generator_temperature}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"frequency"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Generation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_temperature}}/api/v1/start",
+							"host": [
+								"{{base_url_generator_temperature}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"start"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop Generation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_temperature}}/api/v1/stop",
+							"host": [
+								"{{base_url_generator_temperature}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"stop"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Temperature sensor data generation service"
+		},
+		{
+			"name": "Microservice A - Humidity Generator Service",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_humidity}}/api/v1/health",
+							"host": [
+								"{{base_url_generator_humidity}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_humidity}}/api/v1/status",
+							"host": [
+								"{{base_url_generator_humidity}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Frequency",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_humidity}}/api/v1/frequency",
+							"host": [
+								"{{base_url_generator_humidity}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"frequency"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Set Frequency",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"frequency\": \"45s\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url_generator_humidity}}/api/v1/frequency",
+							"host": [
+								"{{base_url_generator_humidity}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"frequency"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Generation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_humidity}}/api/v1/start",
+							"host": [
+								"{{base_url_generator_humidity}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"start"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop Generation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_humidity}}/api/v1/stop",
+							"host": [
+								"{{base_url_generator_humidity}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"stop"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Humidity sensor data generation service"
+		},
+		{
+			"name": "Microservice A - Pressure Generator Service",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_pressure}}/api/v1/health",
+							"host": [
+								"{{base_url_generator_pressure}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_pressure}}/api/v1/status",
+							"host": [
+								"{{base_url_generator_pressure}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Frequency",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_pressure}}/api/v1/frequency",
+							"host": [
+								"{{base_url_generator_pressure}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"frequency"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Set Frequency",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"frequency\": \"60s\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url_generator_pressure}}/api/v1/frequency",
+							"host": [
+								"{{base_url_generator_pressure}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"frequency"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Generation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_pressure}}/api/v1/start",
+							"host": [
+								"{{base_url_generator_pressure}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"start"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop Generation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_pressure}}/api/v1/stop",
+							"host": [
+								"{{base_url_generator_pressure}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"stop"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Pressure sensor data generation service"
+		},
+		{
+			"name": "Microservice A - Light Generator Service",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_light}}/api/v1/health",
+							"host": [
+								"{{base_url_generator_light}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_light}}/api/v1/status",
+							"host": [
+								"{{base_url_generator_light}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Frequency",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_light}}/api/v1/frequency",
+							"host": [
+								"{{base_url_generator_light}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"frequency"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Set Frequency",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"frequency\": \"20s\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url_generator_light}}/api/v1/frequency",
+							"host": [
+								"{{base_url_generator_light}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"frequency"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Generation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_light}}/api/v1/start",
+							"host": [
+								"{{base_url_generator_light}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"start"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop Generation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_light}}/api/v1/stop",
+							"host": [
+								"{{base_url_generator_light}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"stop"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Light sensor data generation service"
+		},
+		{
+			"name": "Microservice A - Motion Generator Service",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_motion}}/api/v1/health",
+							"host": [
+								"{{base_url_generator_motion}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_motion}}/api/v1/status",
+							"host": [
+								"{{base_url_generator_motion}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Frequency",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_motion}}/api/v1/frequency",
+							"host": [
+								"{{base_url_generator_motion}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"frequency"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Set Frequency",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"frequency\": \"10s\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url_generator_motion}}/api/v1/frequency",
+							"host": [
+								"{{base_url_generator_motion}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"frequency"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Generation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_motion}}/api/v1/start",
+							"host": [
+								"{{base_url_generator_motion}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"start"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop Generation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url_generator_motion}}/api/v1/stop",
+							"host": [
+								"{{base_url_generator_motion}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"stop"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Motion sensor data generation service"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url_storage",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "base_url_generator_temperature",
+			"value": "http://localhost:8081",
+			"type": "string"
+		},
+		{
+			"key": "base_url_generator_humidity",
+			"value": "http://localhost:8082",
+			"type": "string"
+		},
+		{
+			"key": "base_url_generator_pressure",
+			"value": "http://localhost:8083",
+			"type": "string"
+		},
+		{
+			"key": "base_url_generator_light",
+			"value": "http://localhost:8084",
+			"type": "string"
+		},
+		{
+			"key": "base_url_generator_motion",
+			"value": "http://localhost:8085",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
