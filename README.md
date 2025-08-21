@@ -20,6 +20,118 @@ This system consists of two main microservices:
 - Pagination support
 - Scalable to handle multiple data sources
 
+## System Architecture Diagram
+
+```mermaid
+graph TB
+    %% External clients
+    Client[🌐 HTTP Clients<br/>Postman/Browser/API]
+    
+    %% Load balancer
+    LB[🔄 Nginx Load Balancer<br/>Port: 80]
+    
+    %% Microservice A instances
+    subgraph "Microservice A (Data Generators)"
+        A1[🌡️ Temperature Generator<br/>Port: 8080<br/>REST API + gRPC Client]
+        A2[💧 Humidity Generator<br/>Port: 8082<br/>REST API + gRPC Client]  
+        A3[📊 Pressure Generator<br/>Port: 8083<br/>REST API + gRPC Client]
+        A4[💡 Light Generator<br/>Port: 8084<br/>REST API + gRPC Client]
+        A5[🚶 Motion Generator<br/>Port: 8085<br/>REST API + gRPC Client]
+    end
+    
+    %% Microservice B
+    subgraph "Microservice B (Storage Service)"
+        B[🗄️ Storage Service<br/>Port: 8081<br/>REST API + gRPC Server]
+        
+        subgraph "Clean Architecture Layers"
+            BH[📝 Handlers Layer<br/>HTTP/gRPC Controllers]
+            BS[⚙️ Services Layer<br/>Business Logic]
+            BR[📦 Repository Layer<br/>Data Access]
+        end
+        
+        subgraph "Modules"
+            AUTH[🔐 Auth Module<br/>JWT Authentication]
+            SENSOR[📊 Sensor Data Module<br/>CRUD Operations]
+            HEALTH[❤️ Health Module<br/>Status Monitoring]
+        end
+    end
+    
+    %% Database
+    DB[(🗃️ MySQL Database<br/>Port: 3306<br/>GORM ORM)]
+    
+    %% Redis (optional caching)
+    REDIS[(🔴 Redis Cache<br/>Port: 6379<br/>Session Storage)]
+    
+    %% External monitoring
+    SWAGGER[📚 Swagger UI<br/>API Documentation<br/>localhost:8081/swagger]
+    
+    %% Connections
+    Client -.-> LB
+    LB --> B
+    Client --> A1
+    Client --> A2  
+    Client --> A3
+    Client --> A4
+    Client --> A5
+    
+    %% gRPC connections from generators to storage
+    A1 -.->|gRPC<br/>SendSensorData| B
+    A2 -.->|gRPC<br/>SendSensorData| B
+    A3 -.->|gRPC<br/>SendSensorData| B
+    A4 -.->|gRPC<br/>SendSensorData| B
+    A5 -.->|gRPC<br/>SendSensorData| B
+    
+    %% Internal architecture
+    B --> BH
+    BH --> BS
+    BS --> BR
+    BR --> DB
+    
+    B --> AUTH
+    B --> SENSOR
+    B --> HEALTH
+    
+    %% Database connections
+    AUTH -.-> DB
+    SENSOR -.-> DB
+    B -.-> REDIS
+    
+    %% Documentation
+    B -.-> SWAGGER
+    
+    %% Styling
+    classDef microserviceA fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef microserviceB fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef database fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef client fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef infrastructure fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    
+    class A1,A2,A3,A4,A5 microserviceA
+    class B,BH,BS,BR,AUTH,SENSOR,HEALTH microserviceB
+    class DB,REDIS database
+    class Client,SWAGGER client
+    class LB infrastructure
+```
+
+### Architecture Principles
+
+- **Clean Architecture**: Each microservice follows clean architecture with clear separation of concerns
+- **Modularity**: Feature-based module organization for maintainability
+- **Scalability**: Horizontal scaling through multiple generator instances
+- **Communication**: gRPC for inter-service communication, REST for client APIs
+- **Data Flow**: Unidirectional data flow from generators to storage
+- **Authentication**: JWT-based authentication with role-based access control
+- **Monitoring**: Health checks and comprehensive logging
+
+### Data Flow
+
+1. **Data Generation**: Microservice A instances generate sensor data at configurable frequencies
+2. **gRPC Transmission**: Generated data is sent to Microservice B via gRPC for efficiency
+3. **Data Storage**: Microservice B stores received data in MySQL using GORM
+4. **API Access**: Clients can query stored data through REST APIs with pagination and filtering
+5. **Authentication**: All API requests are authenticated using JWT tokens
+6. **Load Balancing**: Nginx distributes HTTP traffic across service instances
+
 ## Project Structure
 
 ```
