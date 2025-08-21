@@ -90,7 +90,7 @@ func LoadConfig() *Config {
 		JWT: JWTConfig{
 			Secret:     utils.GetEnvOrDefault("JWT_SECRET", "your-super-secret-jwt-key-here"),
 			Issuer:     utils.GetEnvOrDefault("JWT_ISSUER", "microservice-b"),
-			Expiration: utils.ParseDurationOrZero(utils.GetEnvOrDefault("JWT_EXPIRATION_SECONDS", "24h")),
+			Expiration: time.Duration(utils.ParseInt(utils.GetEnvOrDefault("JWT_EXPIRATION_SECONDS", "86400"))) * time.Second,
 		},
 		RateLimit: RateLimitConfig{
 			RequestsPerMinute: utils.ParseInt(utils.GetEnvOrDefault("RATE_LIMIT", "100")),

@@ -7,6 +7,7 @@ import (
 	"github.com/worlder-team/microservice-server/microservice-b/configs"
 	"github.com/worlder-team/microservice-server/microservice-b/docs"
 	authHandlers "github.com/worlder-team/microservice-server/microservice-b/modules/auth/handlers"
+	"github.com/worlder-team/microservice-server/microservice-b/modules/auth/interfaces"
 	healthHandlers "github.com/worlder-team/microservice-server/microservice-b/modules/health/handlers"
 	sensorHandlers "github.com/worlder-team/microservice-server/microservice-b/modules/sensor-data/handlers"
 	sharedMiddleware "github.com/worlder-team/microservice-server/shared/middleware"
@@ -26,6 +27,7 @@ type Router struct {
 	sensorHandler *sensorHandlers.SensorHandler
 	authHandler   *authHandlers.AuthHandler
 	healthHandler *healthHandlers.HealthHandler
+	jwtService    interfaces.JWTServiceInterface
 	config        *configs.Config
 }
 
@@ -34,12 +36,14 @@ func NewRouter(
 	sensorHandler *sensorHandlers.SensorHandler,
 	authHandler *authHandlers.AuthHandler,
 	healthHandler *healthHandlers.HealthHandler,
+	jwtService interfaces.JWTServiceInterface,
 	config *configs.Config,
 ) *Router {
 	return &Router{
 		sensorHandler: sensorHandler,
 		authHandler:   authHandler,
 		healthHandler: healthHandler,
+		jwtService:    jwtService,
 		config:        config,
 	}
 }
@@ -86,7 +90,7 @@ func (r *Router) setupAuthRoutes(api *echo.Group) {
 // setupSensorRoutes configures sensor data routes (protected)
 func (r *Router) setupSensorRoutes(api *echo.Group) {
 	sensors := api.Group("/sensors")
-	sensors.Use(sharedMiddleware.JWTAuth(r.config.JWT.Secret))
+	sensors.Use(sharedMiddleware.JWTAuth(r.jwtService))
 
 	sensors.GET("", r.sensorHandler.List)
 	sensors.GET("/duration", r.sensorHandler.GetByDuration)

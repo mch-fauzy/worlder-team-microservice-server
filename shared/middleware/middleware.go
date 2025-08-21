@@ -9,6 +9,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/redis/go-redis/v9"
+	"github.com/worlder-team/microservice-server/microservice-b/modules/auth/interfaces"
 	"github.com/worlder-team/microservice-server/shared/constants"
 )
 
@@ -110,7 +111,7 @@ func RequestID() echo.MiddlewareFunc {
 }
 
 // Authentication middleware
-func JWTAuth(jwtSecret string) echo.MiddlewareFunc {
+func JWTAuth(jwtService interfaces.JWTServiceInterface) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			authHeader := c.Request().Header.Get("Authorization")
@@ -129,9 +130,20 @@ func JWTAuth(jwtSecret string) echo.MiddlewareFunc {
 				})
 			}
 
-			// TODO: Implement JWT validation
-			// For now, we'll skip validation for demo purposes
-			c.Set("user_id", "demo_user")
+			// Validate JWT token
+			user, err := jwtService.ValidateToken(tokenString)
+			if err != nil {
+				return c.JSON(http.StatusUnauthorized, ErrorResponse{
+					Status:  constants.StatusError,
+					Message: constants.ErrUnauthorized,
+				})
+			}
+
+			// Set user information in context
+			c.Set("user_id", user.ID)
+			c.Set("user_email", user.Email)
+			c.Set("user_role", user.Role)
+			c.Set("user", user)
 
 			return next(c)
 		}

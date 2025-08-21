@@ -14,10 +14,10 @@ import (
 
 type authService struct {
 	db         *gorm.DB
-	jwtService JWTServiceInterface
+	jwtService interfaces.JWTServiceInterface
 }
 
-func NewAuthService(db *gorm.DB, jwtService JWTServiceInterface) interfaces.AuthServiceInterface {
+func NewAuthService(db *gorm.DB, jwtService interfaces.JWTServiceInterface) interfaces.AuthServiceInterface {
 	return &authService{
 		db:         db,
 		jwtService: jwtService,
@@ -43,7 +43,7 @@ func (s *authService) Login(ctx context.Context, request *dtos.LoginRequest) (*d
 	}
 
 	// Generate JWT token
-	token, err := s.jwtService.GenerateToken(&user)
+	tokenResponse, err := s.jwtService.GenerateToken(&user)
 	if err != nil {
 		return nil, err
 	}
@@ -59,43 +59,12 @@ func (s *authService) Login(ctx context.Context, request *dtos.LoginRequest) (*d
 	}
 
 	response := &dtos.LoginResponse{
-		Token: token,
-		User:  userResponse,
+		Token:     tokenResponse.Token,
+		ExpiresAt: tokenResponse.ExpiresAt,
+		User:      userResponse,
 	}
 
 	return response, nil
-}
-
-// ValidateToken validates JWT token and returns user
-func (s *authService) ValidateToken(ctx context.Context, token string) (*entities.User, error) {
-	return s.jwtService.ValidateToken(token)
-}
-
-// GenerateToken generates JWT token for user
-func (s *authService) GenerateToken(user *entities.User) (string, error) {
-	return s.jwtService.GenerateToken(user)
-}
-
-// ValidateUser validates email and password (helper method)
-func (s *authService) ValidateUser(identifier, password string) (*entities.User, error) {
-	var user entities.User
-
-	// Find user by username or email
-	err := s.db.Where("username = ? OR email = ?", identifier, identifier).First(&user).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return nil, errors.New("invalid credentials")
-		}
-		return nil, err
-	}
-
-	// Validate password
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-	if err != nil {
-		return nil, errors.New("invalid credentials")
-	}
-
-	return &user, nil
 }
 
 // HashPassword creates a bcrypt hash of the password

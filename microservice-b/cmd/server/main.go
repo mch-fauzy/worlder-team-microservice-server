@@ -63,7 +63,7 @@ func main() {
 	sensorRepo := sensorRepositories.NewSensorRepository(db)
 
 	// Initialize JWT service
-	jwtService := authServices.NewJWTService(cfg.JWT.Secret, cfg.JWT.Issuer)
+	jwtService := authServices.NewJWTService(cfg.JWT.Secret, cfg.JWT.Issuer, cfg.JWT.Expiration)
 
 	// Initialize services
 	sensorService := sensorServices.NewSensorService(sensorRepo)
@@ -75,7 +75,7 @@ func main() {
 	healthHandler := healthHandlers.NewHealthHandler()
 
 	// Initialize router
-	router := routes.NewRouter(sensorHandler, authHandler, healthHandler, cfg)
+	router := routes.NewRouter(sensorHandler, authHandler, healthHandler, jwtService, cfg)
 
 	// Start gRPC server in goroutine
 	go startGRPCServer(sensorService, cfg)
