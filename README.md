@@ -370,6 +370,26 @@ make restart
 - `PATCH /sensors/{id}` - Update sensor data (partial update)
 - `DELETE /sensors/{id}` - Delete sensor data by ID
 
+#### Default Login Credentials
+
+Use these credentials to authenticate and access protected endpoints:
+
+```json
+{
+  "email": "admin@example.com",
+  "password": "password"
+}
+```
+
+```json
+{
+  "email": "user@example.com", 
+  "password": "testuser123"
+}
+```
+
+> **Note**: These are default seeded users for development/demo purposes.
+
 Full API documentation is available at `/swagger/index.html` when running the services.
 
 ### Postman Collection
